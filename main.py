@@ -54,7 +54,43 @@ class RPS(object):
 
 
 clock = pygame.time.Clock()
+
+
+def move_elements(l):
+    lngth = len(l)
+    for i in range(lngth):
+            element = l[i]
+            m = l[:i] + l[i:]
+            # for j in range(m):
+            #     if j.obj_type == element.target and :
+            # print()
+            # print(element.obj_type, element.target)
+            # print(i.left, i.right, i.top, i.bottom)
+            
+            if element.rec.left <= 100 or element.rec.right >= 1100:
+                element.direction *= -1
+                element.speed_x *= element.direction
+                element.speed_y *= element.direction
+            if element.rec.top <= 100 or element.rec.bottom >= 550:
+                element.direction *= -1
+                element.speed_x *= element.direction
+                element.speed_y *= element.direction
+            
+                    
+                
+            element.rec.left += element.speed_x
+            element.rec.top += element.speed_y
+    
+            for j in range(len(m)):
+                if m[j].rec.left == element.rec.left and m[j].rec.top == element.rec.top and m[j].obj_type == element.target:
+                    m[j].obj_type = element.obj_type
+                    print(element.obj_type, m[j].obj_type)
+                
+            element.obj_drawing()
+            
+
 def play():
+    
     
     l = []
     n = random.randint(10, 300)
@@ -63,30 +99,17 @@ def play():
         paper = RPS()
         l.append(paper)
     
-
+    # lngth = len(l)
+    k = 0
     while True:
         clock.tick(60)
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
         SCREEN.fill("black")
-        # print(l)
-        for i in l:
-            print(i.obj_type, i.target)
-            # print(i.left, i.right, i.top, i.bottom)
-            if i.rec.left <= 100 or i.rec.right >= 1100:
-                i.direction *= -1
-                i.speed_x *= i.direction
-                i.speed_y *= i.direction
-            if i.rec.top <= 100 or i.rec.bottom >= 550:
-                i.direction *= -1
-                i.speed_x *= i.direction
-                i.speed_y *= i.direction
-        
-                
+        move_elements(l)
+        k+=1
             
-            i.rec.left += i.speed_x
-            i.rec.top += i.speed_y
-            i.obj_drawing()
+                
 
          
         PLAY_TEXT = get_font(40).render("PLAY screen.", True, "White")
