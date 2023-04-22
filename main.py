@@ -16,6 +16,10 @@ def get_font(size):
     return pygame.font.Font("img/font.ttf", size)
 
 
+
+
+
+
 ROCK_IMG = pygame.image.load("img/rock.png").convert_alpha()
 ROCK_IMG = pygame.transform.scale(ROCK_IMG, (15, 15))
 PAPER_IMG = pygame.image.load("img/paper.png").convert_alpha()
@@ -32,9 +36,8 @@ class RPS(object):
 
     def __init__(self):
         self.team_name = random.choice(teams)
-        self.direction = 1
         self.speed_x = 1
-        self.speed_y = 2
+        self.speed_y = 1
         if self.team_name == 'rock':
             self.target = 'scissors'
         elif self.team_name == 'paper':
@@ -179,7 +182,16 @@ def shield_bar(total, player_shield):
 
 
 def play():
-    
+    pygame.mixer.music.pause()
+    pygame.mixer.music.load('img/gigachad.mp3')
+
+    print("music started playing....")
+
+    #Set preferred volume
+    pygame.mixer.music.set_volume(0.2)
+
+    #Play the music
+    pygame.mixer.music.play()	
     
     pygame.display.set_caption("Play")
     gamers = []
@@ -238,6 +250,7 @@ def play():
                     main_menu()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_RESTART.checkForInput(PLAY_MOUSE_POS):
+                    
                     play()
 
         pygame.display.update()
@@ -272,6 +285,15 @@ def options():
 
 
 def main_menu():
+    pygame.mixer.music.load('img/music.mp3')
+
+    print("music started playing....")
+
+    #Set preferred volume
+    pygame.mixer.music.set_volume(0.2)
+
+    #Play the music
+    pygame.mixer.music.play()
     pygame.display.set_caption("Menu")
     while True:
         SCREEN.blit(BG, (0, 0))
@@ -301,6 +323,7 @@ def main_menu():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
                     play()
+
                 if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
                     options()
                 if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
