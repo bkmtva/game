@@ -22,8 +22,8 @@ class RPS(object):
 
     def __init__(self):
         self.obj_type = random.choice(from3)
-        self.direction = random.choice([1,-1])
-        self.speed_x = 2*self.direction
+        self.direction = 1
+        self.speed_x = 4
         self.speed_y = 3
         if self.obj_type == 'rock':
             self.target = 'scissors'
@@ -43,77 +43,100 @@ class RPS(object):
     def obj_drawing(self):
         if self.obj_type == 'rock':
             self.target = 'scissors'
-            return pygame.draw.rect(SCREEN, (0, 105, 176), (self.rec),3)
+            pygame.draw.rect(SCREEN, (0, 105, 176), (self.rec),3)
         elif self.obj_type == 'paper':
+            # rock_img = pygame.image.load("assets/rock.png").convert_alpha()
             self.target = 'rock'
-            return pygame.draw.rect(SCREEN, (0, 255, 176), (self.rec),3)
+            pygame.draw.rect(SCREEN, (0, 255, 176), (self.rec),3)
+
         elif self.obj_type == 'scissors':
+            
             self.target = 'paper'
-            return pygame.draw.rect(SCREEN, (135, 255, 0), (self.rec),3)
+            pygame.draw.rect(SCREEN, (135, 255, 0), (self.rec),3)
 
 
 
 clock = pygame.time.Clock()
 
 
-def move_elements(l):
-    lngth = len(l)
+def move_elements(gamers):
+    lngth = len(gamers)
     for i in range(lngth):
-            element = l[i]
-            m = l[:i] + l[i:]
-            # for j in range(m):
-            #     if j.obj_type == element.target and :
-            # print()
-            # print(element.obj_type, element.target)
-            # print(i.left, i.right, i.top, i.bottom)
-            
-            if element.rec.left <= 100 or element.rec.right >= 1100:
-                element.direction *= -1
-                element.speed_x *= element.direction
-                element.speed_y *= element.direction
-            if element.rec.top <= 100 or element.rec.bottom >= 550:
-                element.direction *= -1
-                element.speed_x *= element.direction
-                element.speed_y *= element.direction
-            
-                    
+            element = gamers[i]
+            m = gamers[:i] + gamers[i:]
+            if not win_checker(gamers):
+                if element.rec.left <= 190 or element.rec.right >= 1010:
+                    element.speed_x *= -1
+        
+                if element.rec.top <= 190 or element.rec.bottom >= 510:
+                    element.speed_y *= -1
                 
-            element.rec.left += element.speed_x
-            element.rec.top += element.speed_y
-    
-            for j in range(len(m)):
-                if m[j].rec.left == element.rec.left and m[j].rec.top == element.rec.top and m[j].obj_type == element.target:
-                    m[j].obj_type = element.obj_type
-                    print(element.obj_type, m[j].obj_type)
+                        
+                    
+                element.rec.x += element.speed_x
+                element.rec.y += element.speed_y
+        
+                for j in range(len(m)):
+                    maybe_target = m[j]
+                    if element.rec.colliderect(maybe_target.rec) and maybe_target.obj_type == element.target:
+                        maybe_target.obj_type = element.obj_type
+                        print(f"element: {element.obj_type}", element.rec.x, element.rec.y)
+                        print(f"target: {maybe_target.obj_type}", maybe_target.rec.x, maybe_target.rec.y)
+            
                 
             element.obj_drawing()
             
+def win_checker(gamers):
+    total = len(gamers)
+    rocks = 0
+    papers = 0
+    scissors = 0
+    for gamer in gamers:
+        if gamer.obj_type == 'rock':
+            rocks += 1
+        elif gamer.obj_type == 'paper':
+            papers +=1
+        elif gamer.obj_type == 'scissors':
+            scissors +=1
+    if rocks == total:
+        return 'Rocks!'
+    if papers == total:
+        return 'Papers!'
+    if scissors == total:
+        return 'Scissors!'
+    return False
+        
 
 def play():
     
     
-    l = []
-    n = random.randint(10, 300)
+    gamers = []
+    n = random.randint(50, 300)
     # n = 5
     for i in range(n):
         paper = RPS()
-        l.append(paper)
+        gamers.append(paper)
     
-    # lngth = len(l)
-    k = 0
+    # lngth = len(gamers)
+    
     while True:
         clock.tick(60)
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
+
+        
         SCREEN.fill("black")
-        move_elements(l)
-        k+=1
-            
-                
+        rec = Rect(random.randrange(200, 1000, 1), random.randrange(200, 500, 1), 10, 10)
+        player_image = pygame.image.load("assets/rock.png").convert_alpha()
+        # player_rect = player_image.get_rect(center=(300,200))
+        pygame.Surface.blit(player_image, SCREEN, rec)
+        # SCREEN.blit(player_image, player_rect)
+        move_elements(gamers)
+        winner = win_checker(gamers)
 
          
-        PLAY_TEXT = get_font(40).render("PLAY screen.", True, "White")
-        PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 30))
+        PLAY_TEXT = get_font(40).render("PLAY screen." if not winner else winner, True, "White")
+        PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 50))
         SCREEN.blit(PLAY_TEXT, PLAY_RECT)
 
         PLAY_BACK = Button(image=None, pos=(640, 600), 
