@@ -1,6 +1,9 @@
 import pygame, sys
 from button import Button
+from pygame.locals import *
 import random
+
+
 pygame.init()
 
 SCREEN = pygame.display.set_mode((1280, 720))
@@ -13,44 +16,79 @@ def get_font(size): # Returns Press-Start-2P in the desired size
 
 from3 = ['rock', 'paper', 'scissors']
 
+
+
 class RPS(object):
 
     def __init__(self):
         self.obj_type = random.choice(from3)
+        self.direction = random.choice([1,-1])
+        self.speed_x = 2*self.direction
+        self.speed_y = 3
+        if self.obj_type == 'rock':
+            self.target = 'scissors'
+        elif self.obj_type == 'paper':
+            self.target = 'rock'
+        elif self.obj_type == 'scissors':
+            self.target = 'paper'
         self.obj_spawn()
+        self.rec = Rect(random.randrange(200, 1000, 1), random.randrange(200, 500, 1), self.width, self.height)
+        
 
     def obj_spawn(self):
-        self.x = random.randrange(200, 1000, 1)
-        self.y = random.randrange(200, 500, 1)
         self.width = 10
         self.height = 10
 
+    
     def obj_drawing(self):
         if self.obj_type == 'rock':
-            pygame.draw.circle(SCREEN, (0, 255, 0), (self.x, self.y), 10)
-
+            self.target = 'scissors'
+            return pygame.draw.rect(SCREEN, (0, 105, 176), (self.rec),3)
         elif self.obj_type == 'paper':
-            pygame.draw.rect(SCREEN, (0, 255, 176), (self.x, self.y, self.width, self.height),3)
+            self.target = 'rock'
+            return pygame.draw.rect(SCREEN, (0, 255, 176), (self.rec),3)
         elif self.obj_type == 'scissors':
-            pygame.draw.rect(SCREEN, (135, 255, 0), (self.x, self.y, self.width, self.height),3)
+            self.target = 'paper'
+            return pygame.draw.rect(SCREEN, (135, 255, 0), (self.rec),3)
 
-speed_x = 5
-speed_y = 4
-direction = 1
+
+
+clock = pygame.time.Clock()
 def play():
+    
     l = []
-    for i in range(random.randint(5, 600)):
+    n = random.randint(10, 300)
+    # n = 5
+    for i in range(n):
         paper = RPS()
         l.append(paper)
     
+
     while True:
+        clock.tick(60)
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
         SCREEN.fill("black")
+        # print(l)
         for i in l:
-            i.obj_drawing()
+            print(i.obj_type, i.target)
+            # print(i.left, i.right, i.top, i.bottom)
+            if i.rec.left <= 100 or i.rec.right >= 1100:
+                i.direction *= -1
+                i.speed_x *= i.direction
+                i.speed_y *= i.direction
+            if i.rec.top <= 100 or i.rec.bottom >= 550:
+                i.direction *= -1
+                i.speed_x *= i.direction
+                i.speed_y *= i.direction
+        
+                
             
-        # Ob = paper.obj_drawing()
+            i.rec.left += i.speed_x
+            i.rec.top += i.speed_y
+            i.obj_drawing()
+
+         
         PLAY_TEXT = get_font(40).render("PLAY screen.", True, "White")
         PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 30))
         SCREEN.blit(PLAY_TEXT, PLAY_RECT)
@@ -70,6 +108,7 @@ def play():
                     main_menu()
 
         pygame.display.update()
+        
     
 def options():
     while True:
