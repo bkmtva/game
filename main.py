@@ -6,13 +6,15 @@ import random
 
 pygame.init()
 
-SCREEN = pygame.display.set_mode((1280, 720))
+SCREEN = pygame.display.set_mode((1280, 650))
 
 
 BG = pygame.image.load("img/Background.png")
 
-def get_font(size): # Returns Press-Start-2P in the desired size
+
+def get_font(size): 
     return pygame.font.Font("img/font.ttf", size)
+
 
 ROCK_IMG = pygame.image.load("img/rock.png").convert_alpha()
 ROCK_IMG = pygame.transform.scale(ROCK_IMG, (15, 15))
@@ -21,25 +23,26 @@ PAPER_IMG = pygame.transform.scale(PAPER_IMG, (15, 15))
 SCISSORS_IMG = pygame.image.load("img/scissors.png").convert_alpha()
 SCISSORS_IMG = pygame.transform.scale(SCISSORS_IMG, (15, 15))
 
-from3 = ['rock', 'paper', 'scissors']
+
+teams = ['rock', 'paper', 'scissors']
 
 
 
 class RPS(object):
 
     def __init__(self):
-        self.obj_type = random.choice(from3)
+        self.team_name = random.choice(teams)
         self.direction = 1
-        self.speed_x = 4
-        self.speed_y = 3
-        if self.obj_type == 'rock':
+        self.speed_x = 1
+        self.speed_y = 2
+        if self.team_name == 'rock':
             self.target = 'scissors'
-        elif self.obj_type == 'paper':
+        elif self.team_name == 'paper':
             self.target = 'rock'
-        elif self.obj_type == 'scissors':
+        elif self.team_name == 'scissors':
             self.target = 'paper'
         self.obj_spawn()
-        self.rec = Rect(random.randrange(200, 1000, 1), random.randrange(200, 500, 1), self.width, self.height)
+        self.rec = Rect(random.randrange(190, 990, 1), random.randrange(200, 500, 1), self.width, self.height)
         
 
     def obj_spawn(self):
@@ -48,16 +51,16 @@ class RPS(object):
 
     
     def obj_drawing(self):
-        if self.obj_type == 'rock':
+        if self.team_name == 'rock':
             self.target = 'scissors'
             # pygame.draw.rect(SCREEN, (0, 105, 176), (self.rec),3)
             SCREEN.blit(ROCK_IMG, self.rec)
-        elif self.obj_type == 'paper':
+        elif self.team_name == 'paper':
             
             self.target = 'rock'
             # pygame.draw.rect(SCREEN, (0, 255, 176), (self.rec),3)
             SCREEN.blit(PAPER_IMG, self.rec)
-        elif self.obj_type == 'scissors':
+        elif self.team_name == 'scissors':
             
             self.target = 'paper'
             # pygame.draw.rect(SCREEN, (135, 255, 0), (self.rec),3)
@@ -68,30 +71,40 @@ clock = pygame.time.Clock()
 
 
 def move_elements(gamers):
+
     lngth = len(gamers)
+
     for i in range(lngth):
             element = gamers[i]
             m = gamers[:i] + gamers[i:]
             if not win_checker(gamers):
-                if element.rec.left <= 190 or element.rec.right >= 1020:
-                    element.speed_x *= -1
-        
-                if element.rec.top <= 190 or element.rec.bottom >= 520:
-                    element.speed_y *= -1
-                
-                        
-                    
                 element.rec.x += element.speed_x
                 element.rec.y += element.speed_y
+                if (element.rec.left <= 200 and element.speed_x < 0)  or (element.rec.right >= 1000 and element.speed_x > 0):
+                        element.speed_x *= -1
         
-                for j in range(len(m)):
-                    maybe_target = m[j]
-                    if element.rec.colliderect(maybe_target.rec) and maybe_target.obj_type == element.target:
-                        maybe_target.obj_type = element.obj_type
-                        # print(f"element: {element.obj_type}", element.rec.x, element.rec.y)
-                        # print(f"target: {maybe_target.obj_type}", maybe_target.rec.x, maybe_target.rec.y)
-            
+                if (element.rec.top <= 200 and element.speed_y < 0) or (element.rec.bottom >= 500 and element.speed_y > 0):
+                    element.speed_y *= -1
+             
                 
+
+                tollerance = 7
+                for maybe_target in m:
+                    if element != maybe_target and element.rec.colliderect(maybe_target.rec):
+                        if maybe_target.team_name == element.target:
+                            maybe_target.team_name = element.team_name
+                        if abs(maybe_target.rec.top - element.rec.bottom) < tollerance and element.speed_y > 0:
+                            element.speed_y*=-1
+                        elif abs(maybe_target.rec.bottom - element.rec.top) < tollerance and element.speed_y < 0:
+                            element.speed_y*=-1
+                        elif abs(maybe_target.rec.right - element.rec.left) < tollerance and element.speed_x < 0:
+                            element.speed_x*=-1
+                        elif abs(maybe_target.rec.left - element.rec.right) < tollerance and element.speed_x > 0:
+                            element.speed_x*=-1
+                    
+                    
+                     
+               
             element.obj_drawing()
 
 
@@ -109,11 +122,11 @@ def win_checker(gamers):
     papers_score = 0
     scissors_score = 0 
     for gamer in gamers:
-        if gamer.obj_type == 'rock':
+        if gamer.team_name == 'rock':
             rocks_score += 1
-        elif gamer.obj_type == 'paper':
+        elif gamer.team_name == 'paper':
             papers_score +=1
-        elif gamer.obj_type == 'scissors':
+        elif gamer.team_name == 'scissors':
             scissors_score +=1
     if rocks_score == total:
         return 'Rocks Won!'
@@ -123,20 +136,6 @@ def win_checker(gamers):
         return 'Scissors Won!'
     return False
 
-def shield_bar(total, player_shield):
-    '''display the graphic and track shield for the gamers'''
-
-    persent = player_shield*100//total
-
-    if persent >= 100:
-        player_shield_color = (124,252,0)
-    elif persent > 75:
-        player_shield_color = (124,252,0)
-    elif persent > 50:
-        player_shield_color = (255,255,0)
-    else:
-        player_shield_color= (255,160,122)
-    return persent, player_shield_color
 
 def drow_schield(team_name, total, score):
     top = 20
@@ -159,13 +158,33 @@ def drow_schield(team_name, total, score):
     TEAM_NAME = get_font(10).render(team_name, True, "White")
     TEAM_RECT = TEAM_NAME.get_rect(center=(left_name, top_name)) 
     SCREEN.blit(TEAM_NAME, TEAM_RECT) 
-    
+
+
+def shield_bar(total, player_shield):
+    '''display the graphic and track shield for the gamers'''
+
+    persent = player_shield*100//total
+
+    if persent >= 100:
+        player_shield_color = (124,252,0)
+    elif persent > 75:
+        player_shield_color = (124,252,0)
+    elif persent > 50:
+        player_shield_color = (255,255,0)
+    else:
+        player_shield_color= (255,160,122)
+    return persent, player_shield_color
+
+
+
+
 def play():
+    
     
     pygame.display.set_caption("Play")
     gamers = []
     n = random.randint(50, 300)
-    # n = 5
+
     for i in range(n):
         paper = RPS()
         gamers.append(paper)
@@ -176,10 +195,15 @@ def play():
         clock.tick(60)
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
-
+        
         
         SCREEN.fill("black")
         
+
+        rec = Rect(200, 200, 800, 310)
+        pygame.draw.rect(SCREEN, (255, 255, 0), (rec),3)
+
+
         move_elements(gamers)
         winner = win_checker(gamers)
 
@@ -246,6 +270,7 @@ def options():
 
         pygame.display.update()
 
+
 def main_menu():
     pygame.display.set_caption("Menu")
     while True:
@@ -283,5 +308,6 @@ def main_menu():
                     sys.exit()
 
         pygame.display.update()
+
 
 main_menu()
