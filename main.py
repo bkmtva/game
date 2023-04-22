@@ -138,17 +138,26 @@ def shield_bar(total, player_shield):
         player_shield_color= (255,160,122)
     return persent, player_shield_color
 
-def drow_schield(team_name, total, score, top=5, top_corner=7):
+def drow_schield(team_name, total, score):
+    top = 20
+    top_corner = 18.5
+    top_name = 30
+    left_name = 164
     if team_name == 'papers':
-        total+=40 
-        top_corner+=40
+        top += 40 
+        top_corner += 40
+        top_name += 40
+        left_name += 5
     elif team_name == 'scissors':
-        total+=80 
-    player_shield_color, persent = shield_bar()
-    pygame.draw.rect(SCREEN, (220,220,220), (5, top, 104, 24), 3)
-    pygame.draw.rect(SCREEN, player_shield_color, (7, top_corner, persent, 20))
-    TEAM_NAME = get_font(10).render("rocks", True, "White")
-    TEAM_RECT = TEAM_NAME.get_rect(center=(144, 15)) 
+        top += 80
+        top_corner += 80
+        top_name += 80
+        left_name += 14
+    persent, player_shield_color = shield_bar(total, score)
+    pygame.draw.rect(SCREEN, (220,220,220), (20, top_corner, 104, 24), 3)
+    pygame.draw.rect(SCREEN, player_shield_color, (22, top, persent, 20))
+    TEAM_NAME = get_font(10).render(team_name, True, "White")
+    TEAM_RECT = TEAM_NAME.get_rect(center=(left_name, top_name)) 
     SCREEN.blit(TEAM_NAME, TEAM_RECT) 
     
 def play():
@@ -170,36 +179,13 @@ def play():
 
         
         SCREEN.fill("black")
-        rec = Rect(random.randrange(200, 1000, 1), random.randrange(200, 500, 1), 10, 10)
-        
-        # player_rect = player_image.get_rect(center=(300,200))
-        # pygame.Surface.blit()
         
         move_elements(gamers)
         winner = win_checker(gamers)
 
         drow_schield("rocks", total, rocks_score)
-        # display score
-        persent, player_shield_color = shield_bar(total, rocks_score)
-        pygame.draw.rect(SCREEN, (220,220,220), (5, 5, 104, 24), 3)
-        pygame.draw.rect(SCREEN, player_shield_color, (7, 7, persent, 20))
-        TEAM_NAME = get_font(10).render("rocks", True, "White")
-        TEAM_RECT = TEAM_NAME.get_rect(center=(144, 15)) 
-        SCREEN.blit(TEAM_NAME, TEAM_RECT) 
-
-        persent, player_shield_color = shield_bar(total, papers_score)
-        pygame.draw.rect(SCREEN, (220,220,220), (5, 45, 104, 24), 3)
-        pygame.draw.rect(SCREEN, player_shield_color, (7, 47, persent, 20))   
-        TEAM_NAME = get_font(10).render("papers", True, "White")
-        TEAM_RECT = TEAM_NAME.get_rect(center=(149, 55)) 
-        SCREEN.blit(TEAM_NAME, TEAM_RECT)
-
-        persent, player_shield_color = shield_bar(total, scissors_score)
-        pygame.draw.rect(SCREEN, (220,220,220), (5, 95, 104, 24), 3)
-        pygame.draw.rect(SCREEN, player_shield_color, (7, 97, persent, 20))   
-        TEAM_NAME = get_font(10).render("scissors", True, "White")
-        TEAM_RECT = TEAM_NAME.get_rect(center=(157, 105)) 
-        SCREEN.blit(TEAM_NAME, TEAM_RECT)
+        drow_schield("papers", total, papers_score)
+        drow_schield("scissors", total, scissors_score)
         
         PLAY_TEXT = get_font(40).render("Observe the game!" if not winner else "We have Winner!", True, "White")
         PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 60))
