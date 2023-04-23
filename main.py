@@ -36,6 +36,7 @@ team_names = ['rock', 'paper', 'scissors']
 
 clock = pygame.time.Clock()
 
+speed = 1
 
 class RPS(object):
 
@@ -45,8 +46,9 @@ class RPS(object):
         self.height = 15
 
         # random direction for speed 1
-        self.speed_x = random.choice([1, -1])
-        self.speed_y = random.choice([1, -1])
+        
+        self.speed_x = random.choice([abs(speed), -abs(speed)])
+        self.speed_y = random.choice([abs(speed), -abs(speed)])
 
         self.set_target()
 
@@ -60,6 +62,7 @@ class RPS(object):
             self.target = 'rock'
         elif self.team_name == 'scissors':
             self.target = 'paper'
+    
 
     def player_drawing(self):
         self.set_target()
@@ -73,7 +76,7 @@ class RPS(object):
 
 def move_elements(players):
     for player in players:
-            if not win_checker(players):
+            if not win_checker(players) and TIMER_DONE:
                 player.rec.x += player.speed_x
                 player.rec.y += player.speed_y
 
@@ -149,18 +152,22 @@ def drow_schield(team_name, total, score):
         top_corner += 80
         top_name += 80
         left_name += 14
-        
+
     persent, player_shield_color = get_persent_color(total, score)
     pygame.draw.rect(SCREEN, (220,220,220), (20, top_corner, 104, 24), 3)
     pygame.draw.rect(SCREEN, player_shield_color, (22, top, persent, 20))
+    TEAM_SCORE = get_font(8).render(str(persent)+'%', True, "White")
+    TEAM_RECT = TEAM_SCORE.get_rect(center=(107, top_name)) 
+    SCREEN.blit(TEAM_SCORE, TEAM_RECT)  
     TEAM_NAME = get_font(10).render(team_name, True, "White")
-    TEAM_RECT = TEAM_NAME.get_rect(center=(left_name, top_name)) 
+    TEAM_RECT = TEAM_NAME.get_rect(center=(left_name, top_name))
+    
     SCREEN.blit(TEAM_NAME, TEAM_RECT) 
 
 
 def get_persent_color(total, player_shield):
     persent = player_shield*100//total
-    if persent > 70:
+    if persent > 75:
         player_shield_color = (124,252,0)
     elif persent > 35:
         player_shield_color = (255,255,0)
@@ -169,16 +176,53 @@ def get_persent_color(total, player_shield):
     return persent, player_shield_color
 
 
-def play_button_controller(PLAY_MOUSE_POS):
+
+def speed_controller(gamers, one):
+    global speed
+
+    if speed == 0 and one == -1:
+        return
+    speed += one
+    
+    for player in gamers:
+        if player.speed_x == 0 and player.speed_y == 0:
+            
+            player.speed_x = random.choice([abs(speed), -abs(speed)])
+            player.speed_y = random.choice([abs(speed), -abs(speed)])
+        else:
+            if player.speed_x < 0:
+                player.speed_x = -speed
+            elif player.speed_x > 0:
+                player.speed_x = speed
+            if player.speed_y < 0:
+                player.speed_y = -speed
+            elif player.speed_y > 0:
+                player.speed_y = speed 
+
+
+
+def play_button_controller(PLAY_MOUSE_POS, gamers):
     PLAY_BACK = Button(image=None, pos=(820, 600), 
                             text_input="BACK", font=get_font(50), base_color="White", hovering_color="Red")
-    PLAY_RESTART = Button(image=None, pos=(500, 600), 
+    PLAY_RESTART = Button(image=None, pos=(450, 600), 
                         text_input="RESTART", font=get_font(50), base_color="White", hovering_color="Yellow")
+    
+    button_img = pygame.image.load("img/Quit Rect.png")
+    button_img = pygame.transform.scale(button_img, (150, 40))
+
+    speed_increase = Button(image=button_img, pos=(100, 200), 
+                        text_input="faster", font=get_font(20), base_color="White", hovering_color="Green")
+    speed_decrease = Button(image=button_img, pos=(100, 250), 
+                        text_input="slower", font=get_font(20), base_color="White", hovering_color="Red")
 
     PLAY_BACK.changeColor(PLAY_MOUSE_POS)
     PLAY_BACK.update(SCREEN)
     PLAY_RESTART.changeColor(PLAY_MOUSE_POS)
     PLAY_RESTART.update(SCREEN)
+    speed_increase.changeColor(PLAY_MOUSE_POS)
+    speed_increase.update(SCREEN)
+    speed_decrease.changeColor(PLAY_MOUSE_POS)
+    speed_decrease.update(SCREEN)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -190,18 +234,22 @@ def play_button_controller(PLAY_MOUSE_POS):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if PLAY_RESTART.checkForInput(PLAY_MOUSE_POS):
                 play()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if speed_increase.checkForInput(PLAY_MOUSE_POS):
+                speed_controller(gamers, 1)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if speed_decrease.checkForInput(PLAY_MOUSE_POS):
+                speed_controller(gamers, -1)
 
+
+TIMER_DONE = False
 def play():
-
+    global speed
+    speed = 1
     pygame.display.set_caption("Play")
-    
-    #music
-    pygame.mixer.music.pause()
-    pygame.mixer.music.load('img/gigachad.mp3')
-    pygame.mixer.music.set_volume(0.2)
-    pygame.mixer.music.play()	
-    
 
+    global TIMER_DONE
+    TIMER_DONE = False
     gamers = []
     total_gamers_num = random.randint(50, 200)
 
@@ -210,7 +258,61 @@ def play():
         gamers.append(paper)
     
     
+    # fight music on
+    pygame.mixer.music.pause()
+    pygame.mixer.music.load('img/fight.mp3')
+    pygame.mixer.music.set_volume(0.2)
+    pygame.mixer.music.play()
+    
+    
+    
+    timer = 4200  # milliseconds
+    
+    
+    start_time = pygame.time.get_ticks()
+    seconds_left = 3
+    while pygame.time.get_ticks() - start_time < timer:
+        SCREEN.fill("black")
+        SCREEN.blit(BG2, (0, 0))
+        move_elements(gamers)
+        rec = Rect(200, 88, 800, 360)
+        SCREEN.blit(BORDERS_IMG, rec)
+        PLAY_TEXT = get_font(40).render("Observe the game!", True, "White")
+        PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 60))
+        SCREEN.blit(PLAY_TEXT, PLAY_RECT)
+        
+        # pygame.display.update()
+        seconds_left_repeated = abs((pygame.time.get_ticks() - start_time)//1000-3)
+        if seconds_left_repeated < seconds_left:
+            seconds_left = seconds_left_repeated
+        PLAY_TEXT = get_font(70).render(str(seconds_left if seconds_left != 0 else 'FIGHT'), False, (0,0,0,0))
+        PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 300))
+        SCREEN.blit(PLAY_TEXT, PLAY_RECT)
+        pygame.display.update()
+        
+        # Handle events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+    TIMER_DONE = True
+
+    #win win music
+    pygame.mixer.music.pause()
+    win_music = pygame.mixer.music.load('img/tbcontinued.mp3')
+    # pygame.mixer.music.set_volume(0.2)
+    # pygame.mixer.music.play()
+    # pygame.mixer.music.pause()
+
+    #gigachad mucis on 
+    pygame.mixer.music.pause()
+    pygame.mixer.music.load('img/gigachad.mp3')
+    pygame.mixer.music.set_volume(0.2)
+    pygame.mixer.music.play(-1)
+    win_sound = pygame.mixer.Sound('img/tbcontinued.mp3')
+    zero_played = True
     while True:
+        
         clock.tick(60)
 
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
@@ -231,15 +333,25 @@ def play():
         drow_schield("scissors", total_gamers_num, scissors_score)
         
         PLAY_TEXT = get_font(40).render("Observe the game!" if not winner else "We have Winner!", True, "White")
-        PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 60))
+        PLAY_RECT = PLAY_TEXT.get_rect(center=(600, 60))
         SCREEN.blit(PLAY_TEXT, PLAY_RECT)
-        if winner:
-            WON_TEXT = get_font(40).render(winner, True, "Green")
-            WON_RECT = PLAY_TEXT.get_rect(center=(715, 300))
-            SCREEN.blit(WON_TEXT, WON_RECT)
 
-        play_button_controller(PLAY_MOUSE_POS)
+       
+        if winner:
+            if zero_played:
+                pygame.mixer.music.pause()
+                win_sound.play()
+                zero_played = False
+            WINNER_TEXT = get_font(40).render(winner, True, "Green")
+            WINNER_RECT = WINNER_TEXT.get_rect(center=(630, 300))
+            SCREEN.blit(WINNER_TEXT, WINNER_RECT)
+
+
+        play_button_controller(PLAY_MOUSE_POS, gamers)
+
         pygame.display.update()
+        
+        
         
 
 def main_menu():
@@ -248,7 +360,7 @@ def main_menu():
     #music
     pygame.mixer.music.load('img/music.mp3')
     pygame.mixer.music.set_volume(0.2)
-    pygame.mixer.music.play()
+    pygame.mixer.music.play(-1)
     
 
     while True:
