@@ -156,12 +156,13 @@ def drow_schield(team_name, total, score):
     persent, player_shield_color = get_persent_color(total, score)
     pygame.draw.rect(SCREEN, (220,220,220), (20, top_corner, 104, 24), 3)
     pygame.draw.rect(SCREEN, player_shield_color, (22, top, persent, 20))
+
     TEAM_SCORE = get_font(8).render(str(persent)+'%', True, "White")
     TEAM_RECT = TEAM_SCORE.get_rect(center=(107, top_name)) 
     SCREEN.blit(TEAM_SCORE, TEAM_RECT)  
+
     TEAM_NAME = get_font(10).render(team_name, True, "White")
     TEAM_RECT = TEAM_NAME.get_rect(center=(left_name, top_name))
-    
     SCREEN.blit(TEAM_NAME, TEAM_RECT) 
 
 
@@ -187,8 +188,8 @@ def speed_controller(gamers, one):
     for player in gamers:
         if player.speed_x == 0 and player.speed_y == 0:
             
-            player.speed_x = random.choice([abs(speed), -abs(speed)])
-            player.speed_y = random.choice([abs(speed), -abs(speed)])
+            player.speed_x = random.choice([speed, -speed])
+            player.speed_y = random.choice([speed, -speed])
         else:
             if player.speed_x < 0:
                 player.speed_x = -speed
@@ -210,9 +211,9 @@ def play_button_controller(PLAY_MOUSE_POS, gamers):
     button_img = pygame.image.load("img/Quit Rect.png")
     button_img = pygame.transform.scale(button_img, (150, 40))
 
-    speed_increase = Button(image=button_img, pos=(100, 200), 
+    speed_increase = Button(image=button_img, pos=(100, 250), 
                         text_input="faster", font=get_font(20), base_color="White", hovering_color="Green")
-    speed_decrease = Button(image=button_img, pos=(100, 250), 
+    speed_decrease = Button(image=button_img, pos=(100, 300), 
                         text_input="slower", font=get_font(20), base_color="White", hovering_color="Red")
 
     PLAY_BACK.changeColor(PLAY_MOUSE_POS)
@@ -223,7 +224,9 @@ def play_button_controller(PLAY_MOUSE_POS, gamers):
     speed_increase.update(SCREEN)
     speed_decrease.changeColor(PLAY_MOUSE_POS)
     speed_decrease.update(SCREEN)
-
+    display_speed = get_font(10).render('SPEED '+ str(speed), True, "White")
+    SPEED_RECT = display_speed.get_rect(center=(100, 200))
+    SCREEN.blit(display_speed, SPEED_RECT)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -297,20 +300,17 @@ def play():
                 quit()
     TIMER_DONE = True
 
-    #win win music
-    pygame.mixer.music.pause()
-    win_music = pygame.mixer.music.load('img/tbcontinued.mp3')
-    # pygame.mixer.music.set_volume(0.2)
-    # pygame.mixer.music.play()
-    # pygame.mixer.music.pause()
+    
 
     #gigachad mucis on 
     pygame.mixer.music.pause()
     pygame.mixer.music.load('img/gigachad.mp3')
     pygame.mixer.music.set_volume(0.2)
     pygame.mixer.music.play(-1)
+
     win_sound = pygame.mixer.Sound('img/tbcontinued.mp3')
-    zero_played = True
+    zero_played = True # if win_sound played once it will not play again in one round, couse in one round we have one winner
+
     while True:
         
         clock.tick(60)
