@@ -87,7 +87,7 @@ def move_elements(players):
                 if (player.rec.top <= 160 and player.speed_y < 0) or (player.rec.bottom >= 470 and player.speed_y > 0):
                     player.speed_y *= -1
                 
-                # collision between gamers
+                # collision between players
                 tollerance = 7
                 for maybe_target in players:
                     if maybe_target != player:
@@ -111,15 +111,15 @@ papers_score = 0
 scissors_score = 0
 
 
-def win_checker(gamers):
-    total = len(gamers)
+def win_checker(players):
+    total = len(players)
     global rocks_score
     global papers_score
     global scissors_score
     rocks_score = 0
     papers_score = 0
     scissors_score = 0 
-    for gamer in gamers:
+    for gamer in players:
         if gamer.team_name == 'rock':
             rocks_score += 1
         elif gamer.team_name == 'paper':
@@ -136,7 +136,7 @@ def win_checker(gamers):
 
 
 def drow_schield(team_name, total, score):
-    '''display the graphic and track shield for the gamers'''
+    '''display the graphic and track shield for the watcher'''
 
     top = 20
     top_corner = 18.5
@@ -178,14 +178,16 @@ def get_persent_color(total, player_shield):
 
 
 
-def speed_controller(gamers, one):
+def speed_controller(players, one):
+    if win_checker(players): #we we have winner don change speed
+        return 
+    
     global speed
-
     if speed == 0 and one == -1:
         return
     speed += one
     
-    for player in gamers:
+    for player in players:
         if player.speed_x == 0 and player.speed_y == 0:
             
             player.speed_x = random.choice([speed, -speed])
@@ -202,7 +204,7 @@ def speed_controller(gamers, one):
 
 
 
-def play_button_controller(PLAY_MOUSE_POS, gamers):
+def play_button_controller(PLAY_MOUSE_POS, players):
     PLAY_BACK = Button(image=None, pos=(820, 600), 
                             text_input="BACK", font=get_font(50), base_color="White", hovering_color="Red")
     PLAY_RESTART = Button(image=None, pos=(450, 600), 
@@ -239,10 +241,10 @@ def play_button_controller(PLAY_MOUSE_POS, gamers):
                 play()
         if event.type == pygame.MOUSEBUTTONDOWN:
             if speed_increase.checkForInput(PLAY_MOUSE_POS):
-                speed_controller(gamers, 1)
+                speed_controller(players, 1)
         if event.type == pygame.MOUSEBUTTONDOWN:
             if speed_decrease.checkForInput(PLAY_MOUSE_POS):
-                speed_controller(gamers, -1)
+                speed_controller(players, -1)
 
 
 TIMER_DONE = False
@@ -253,12 +255,12 @@ def play():
 
     global TIMER_DONE
     TIMER_DONE = False
-    gamers = []
-    total_gamers_num = random.randint(50, 200)
+    players = []
+    total_players_num = random.randint(50, 200)
 
-    for i in range(total_gamers_num):
+    for i in range(total_players_num):
         paper = RPS()
-        gamers.append(paper)
+        players.append(paper)
     
     
     # fight music on
@@ -277,7 +279,7 @@ def play():
     while pygame.time.get_ticks() - start_time < timer:
         SCREEN.fill("black")
         SCREEN.blit(BG2, (0, 0))
-        move_elements(gamers)
+        move_elements(players)
         rec = Rect(200, 88, 800, 360)
         SCREEN.blit(BORDERS_IMG, rec)
         PLAY_TEXT = get_font(40).render("Observe the game!", True, "White")
@@ -324,13 +326,13 @@ def play():
         rec = Rect(200, 88, 800, 360)
         SCREEN.blit(BORDERS_IMG, rec)
 
-        move_elements(gamers)
+        move_elements(players)
 
-        winner = win_checker(gamers)
+        winner = win_checker(players)
 
-        drow_schield("rocks", total_gamers_num, rocks_score)
-        drow_schield("papers", total_gamers_num, papers_score)
-        drow_schield("scissors", total_gamers_num, scissors_score)
+        drow_schield("rocks", total_players_num, rocks_score)
+        drow_schield("papers", total_players_num, papers_score)
+        drow_schield("scissors", total_players_num, scissors_score)
         
         PLAY_TEXT = get_font(40).render("Observe the game!" if not winner else "We have Winner!", True, "White")
         PLAY_RECT = PLAY_TEXT.get_rect(center=(600, 60))
@@ -347,7 +349,7 @@ def play():
             SCREEN.blit(WINNER_TEXT, WINNER_RECT)
 
 
-        play_button_controller(PLAY_MOUSE_POS, gamers)
+        play_button_controller(PLAY_MOUSE_POS, players)
 
         pygame.display.update()
         
