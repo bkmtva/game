@@ -3,7 +3,9 @@
 
 ## Installation
  
-[https://www.python.org/downloads/](#Download python)
+Follow this lonk to download python3 [https://www.python.org/downloads/]
+
+use pip to install pygame library
 ```
 ./pip install pygame 
 ```
