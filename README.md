@@ -7,7 +7,7 @@ Follow this link to download python3 - https://www.python.org/downloads/
 
 Use **pip** to install pygame library
 ```
-./pip install pygame 
+pip install pygame 
 ```
 
 ## Usage
